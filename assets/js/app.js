@@ -5,8 +5,9 @@
 
 // --- Configuration Constants ---
 const BOOT_TRANSITION_DELAY_MS = 1200; // 1.2 seconds
-const TELEMETRY_API_ENDPOINT = 'http://129.80.222.26:3000/metrics';
+const TELEMETRY_API_ENDPOINT = 'https://129.80.222.26:3000/metrics';
 const TELEMETRY_UPDATE_INTERVAL_MS = 10000; // 10 seconds
+const OCI_MEDIA_BASE_URL = 'http://129.80.222.26:3000/stream/';
 
 // --- 1. BOOT SEQUENCE TRANSITION ---
 // Initial site setup and boot sequence
@@ -99,18 +100,104 @@ function updateProgressBar(fillId, textId, value) {
 
 
 // --- 3. MUSIC PLAYER LOGIC ---
-// Simplified setup for the "Studio" page
 const audio = document.getElementById('main-audio');
 const playBtn = document.getElementById('play-btn');
+const trackList = document.getElementById('track-list'); // Get the UL
+const playerTrackTitle = document.getElementById('player-track-title');
+const activeCover = document.getElementById('active-cover');
+const prevBtn = document.getElementById('prev-btn'); // For previous track button
+const nextBtn = document.getElementById('next-btn'); // For next track button
 
+let currentTrackIndex = -1; // -1 means no track selected initially
+let tracks = []; // To store track data
+
+// Function to load a track
+function loadTrack(index) {
+    if (index < 0 || index >= tracks.length) return;
+
+    currentTrackIndex = index;
+    const trackName = tracks[index].name.replace('.wav', '.mp3'); // Assume .mp3 on server
+    const trackTitle = tracks[index].name.replace(/_/g, ' ').replace('.wav', ''); // For display
+    const coverName = tracks[index].name.replace('.wav', '.webp'); // Assume .webp for cover
+
+    audio.src = OCI_MEDIA_BASE_URL + trackName;
+    playerTrackTitle.innerText = trackTitle;
+
+    // Update active cover
+    if (activeCover) {
+        activeCover.srcset = `assets/img/music_covers/${coverName}`;
+        activeCover.src = `assets/img/music_covers/${coverName.replace('.webp', '.jpg')}`; // Fallback for jpg
+    }
+    
+    // Automatically play if a track is already playing or if it's the first track selected
+    if (!audio.paused || currentTrackIndex === 0) { // Add condition to play first track if clicked
+        audio.play();
+        playBtn.innerText = '⏸';
+    } else {
+        playBtn.innerText = '▶';
+    }
+}
+
+// Event listener for play/pause button
 if (playBtn && audio) {
     playBtn.addEventListener('click', () => {
-        if (audio.paused) {
+        if (currentTrackIndex === -1 && tracks.length > 0) {
+            // If no track is selected, play the first one
+            loadTrack(0);
+        } else if (audio.paused) {
             audio.play();
             playBtn.innerText = '⏸';
         } else {
             audio.pause();
             playBtn.innerText = '▶';
+        }
+    });
+}
+
+// Event listeners for previous/next buttons
+if (prevBtn) {
+    prevBtn.addEventListener('click', () => {
+        if (currentTrackIndex > 0) {
+            loadTrack(currentTrackIndex - 1);
+        } else if (tracks.length > 0) {
+            loadTrack(tracks.length - 1); // Loop to last track
+        }
+    });
+}
+
+if (nextBtn) {
+    nextBtn.addEventListener('click', () => {
+        if (currentTrackIndex < tracks.length - 1) {
+            loadTrack(currentTrackIndex + 1);
+        } else if (tracks.length > 0) {
+            loadTrack(0); // Loop to first track
+        }
+    });
+}
+
+
+// Populate tracks array and set up click listeners
+if (trackList) {
+    const trackItems = trackList.querySelectorAll('.track-select');
+    trackItems.forEach((item, index) => {
+        tracks.push({
+            name: item.querySelector('.name').innerText,
+            // You can add more properties here like size, artist, etc.
+        });
+        item.addEventListener('click', () => loadTrack(index));
+    });
+}
+
+// Handle audio ended event
+if (audio) {
+    audio.addEventListener('ended', () => {
+        if (currentTrackIndex < tracks.length - 1) {
+            loadTrack(currentTrackIndex + 1); // Play next track
+            audio.play();
+        } else {
+            // Last track ended, stop or loop
+            playBtn.innerText = '▶';
+            currentTrackIndex = -1; // Reset selection
         }
     });
 }
