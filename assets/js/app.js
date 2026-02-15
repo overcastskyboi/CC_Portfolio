@@ -5,9 +5,9 @@
 
 // --- Configuration Constants ---
 const BOOT_TRANSITION_DELAY_MS = 1200; // 1.2 seconds
-const TELEMETRY_API_ENDPOINT = 'https://129.80.222.26:3000/metrics';
+const TELEMETRY_API_ENDPOINT = 'https://portfolio.yourdomain.com/metrics';
 const TELEMETRY_UPDATE_INTERVAL_MS = 10000; // 10 seconds
-const OCI_MEDIA_BASE_URL = 'https://129.80.222.26:3000/stream/';
+const OCI_MEDIA_BASE_URL = 'https://portfolio.yourdomain.com/stream/';
 
 // --- 1. BOOT SEQUENCE TRANSITION ---
 // Initial site setup and boot sequence
@@ -66,10 +66,19 @@ async function updateLiveTelemetry() {
         
         const data = await response.json();
 
+        // Add safety check for data.disk
+        let diskCapacity = "0";
+        let diskTotal = "N/A";
+
+        if (data && data.disk) {
+            diskCapacity = data.disk.capacity || "0"; // Use || "0" for robustness
+            diskTotal = data.disk.total || "N/A"; // Use || "N/A" for robustness
+        }
+
         // Update Hardware Progress Bars
         updateProgressBar('cpu-fill', 'cpu-perc', data.cpu);
         updateProgressBar('ram-fill', 'ram-perc', data.mem);
-        updateProgressBar('disk-fill', 'disk-perc', data.disk.capacity);
+        updateProgressBar('disk-fill', 'disk-perc', diskCapacity); // Use local diskCapacity
 
         // Update Text Metrics
         if (document.getElementById('uptime-val')) {
@@ -78,8 +87,7 @@ async function updateLiveTelemetry() {
             document.getElementById('uptime-val').innerText = `${h}h ${m}m`;
         }
         if (document.getElementById('disk-total')) {
-            document.getElementById('disk-total').innerText = data.disk.total;
-        }
+            document.getElementById('disk-total').innerText = diskTotal; // Use local diskTotal
 
         // Set Online Status
         updateServerStatus(true);
@@ -125,8 +133,8 @@ function loadTrack(index) {
 
     // Update active cover
     if (activeCover) {
-        activeCover.srcset = `assets/img/music_covers/${coverName}`;
-        activeCover.src = `assets/img/music_covers/${coverName.replace('.webp', '.jpg')}`; // Fallback for jpg
+        activeCover.srcset = `${OCI_MEDIA_BASE_URL}music_covers/${coverName}`;
+        activeCover.src = `${OCI_MEDIA_BASE_URL}music_covers/${coverName.replace('.webp', '.jpg')}`; // Fallback for jpg
     }
     
     // Automatically play if a track is already playing or if it's the first track selected
