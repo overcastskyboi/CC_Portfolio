@@ -1,26 +1,58 @@
-# Colin Elliott Cherry's OCI Portfolio Stack
+# OCI Project: Full-Stack Portfolio & Telemetry Infrastructure
 
-This project showcases a full-stack web application hosted on **Oracle Cloud Infrastructure (OCI)**, featuring a live telemetry dashboard and a dynamic portfolio frontend. It demonstrates real-time data integration, robust backend services, and a modern user experience.
+This document outlines the architecture, deployment, and optimization of an Oracle Cloud Infrastructure (OCI) Always Free instance, serving a dual-identity portfolio site with real-time telemetry.
 
-## 🚀 Technical Highlights
+## Architecture Overview
 
-*   **Infrastructure:** Deployed on an OCI Compute Instance (Oracle Linux 9) with hardened security via Stateful Ingress rules.
-*   **Backend (Telemetry API):** A containerized Node.js application (accessible on Port 3000) that exposes real-time system metrics by mapping host `/proc` and `/sys` filesystems.
-*   **Orchestration:** Docker Compose manages both the Telemetry API and a Portainer management console for container health and monitoring.
-*   **Frontend (Portfolio_Site):** A responsive web interface consuming live telemetry data.
-    *   **Data Flow:** Utilizes an `async/fetch` pipeline in `assets/js/app.js` to poll the backend every 10 seconds.
-    *   **Server Status:** Features a dynamic "Server Live" status indicator, with automatic "Offline" detection if the API heartbeat is interrupted.
-    *   **Terminal Boot Sequence:** An immersive boot-up animation at `index.html` with a smooth transition to the main content once "READY." is displayed.
+**Host:** OCI Compute Instance (IP: 129.80.222.26)
+*   **Shape:** Ampere A1.Flex (ARM) - 4 OCPU, 24 GB RAM
+*   **Operating System:** Oracle Linux 9
+*   **Disk:** 83GB Boot Volume partition expansion, with a 4GB Swap File for stability.
 
-## 🛠 Directory Structure
+**Orchestration:** Docker Compose (v2)
+*   Manages a multi-container stack for backend services.
 
-*   `docker/telemetry/`: Contains the OCI backend configuration, including Docker Compose files and the Node.js API source.
-*   `Portfolio_Site/`: Houses the public-facing frontend application, which consumes data from the live telemetry stream.
+**Dual-Container Stack:**
+1.  **CEC Metrics API (`cec-metrics-api`):**
+    *   Node.js backend, mapping host `/proc` and `/sys` for kernel-level telemetry (CPU, RAM, Disk Usage, Uptime, Load).
+    *   Exposes metrics via REST API on Port 3000.
+    *   **Robustness:** Improved error handling for `df` command execution and more robust parsing of disk metrics.
+2.  **Portainer (`portainer-console`):
+    *   Visual container management console on Port 9000.
 
-## 🚦 Key Features
+**Frontend:**
+*   Multi-page "Dual-Boot" portfolio (`S:\Oracle Cloud\Portfolio_Site`) served via Nginx.
+*   `app.js` handles:
+    *   **Real-time Telemetry:** Polls the CEC Metrics API (now `https://129.80.222.26:3000/metrics`) for live hardware metrics and "Server Live" status. Disk metrics display gracefully handles unavailable or zero values.
+    *   **Music Player:** Integrates a functional music player that streams audio files from the OCI Node.js API (`https://129.80.222.26:3000/stream/`).
+*   **Client-Side Scripting:** Vanilla JavaScript for dynamic interactions.
 
-*   **Live System Metrics:** Displays real-time CPU load, memory usage, disk utilization, and system uptime.
-*   **Visual Management:** Integration with Portainer for comprehensive Docker container oversight.
-*   **Resilient UI:** Automatic API status detection ensures graceful handling of backend connectivity issues.
-*   **Dynamic Boot Experience:** Engaging terminal-style boot animation with a controlled transition to the main portfolio.
-*   **Interactive Navigation:** Seamless access to `/hub`, `/systems`, and `/music` sections.
+## Security & Network Hardening
+
+*   **Firewall:** Linux `firewalld` configured on the instance.
+*   **OCI Network Security Lists (Stateful Ingress Rules):**
+    *   **Port 22 (SSH):** Locked down to `99.73.115.55/32` (or your specific IP) for secure remote access.
+    *   **Port 3000 (Metrics API):** Open to `0.0.0.0/0` to allow public frontend access.
+    *   **Port 9000 (Portainer):** Locked down to `0.0.0.0/0` (or your specific IP) for management console access.
+*   **IP Persistence:** Configured with a Reserved Public IP to ensure the portfolio URL remains stable across instance reboots.
+
+## Always Free Optimization & Reclamation Protection
+
+*   **Full Resource Utilization:** Instance scaled to utilize the full 4 OCPU / 24 GB RAM Always Free allocation.
+*   **"Never-Idle" Script (`never_idle.sh`):**
+    *   A `crontab` job that periodically generates ~25% CPU load and minimal network traffic.
+    *   Ensures CPU/Network utilization remains above Oracle's 20% reclamation threshold, preventing idle resource reclamation.
+
+## Deployment Strategy
+
+*   **Local Development:** All source code maintained in `S:\Oracle Cloud\Portfolio_Site`.
+*   **OCI Deployment:** Automated `deploy.ps1` script (v3.1 - "Self-Updating" Super-Deploy) pushes frontend (HTML, CSS, JS) changes to the OCI Nginx web root.
+*   **Media Hosting:** Large media files (music, covers) are *not* tracked by GitHub and are instead served directly by the OCI Node.js API from a dedicated 'music' directory on the OCI instance.
+*   **GitHub Integration:** Code pushed to `https://github.com/overcastskyboi/CC-Portfolio` for version control and GitHub Pages hosting, with auto-commit timestamping.
+
+---
+
+## Important Considerations & Known Issues
+
+*   **Mixed Content / HTTPS Certificate Warnings:** The Frontend (hosted on HTTPS GitHub Pages) attempts to connect to the OCI Node.js API (telemetry and media streaming) over HTTPS directly to an IP address (e.g., `https://129.80.222.26:3000/...`). This configuration often leads to browser warnings or errors related to untrusted SSL certificates, as HTTPS with raw IP addresses is typically not trusted without a proper domain and server-side SSL configuration. This does not prevent functionality but may present security warnings to users.
+*   **OCI Media Setup:** For the music player to function, the 'music' directory on the OCI instance (within `/home/opc/docker/telemetry/`) must exist and contain the actual media files (e.g., `.mp3`, `.webp` covers).
