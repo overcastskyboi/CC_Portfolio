@@ -71,20 +71,74 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function formatTime(s) { if (isNaN(s)) return "0:00"; const m = Math.floor(s/60); const sec = Math.floor(s%60); return `${m}:${sec<10?'0':''}${sec}`; }
 
+    // --- Systems Page Specifics (Real-time Telemetry) ---
     if (document.body.classList.contains('page-systems')) {
+        const telemetryEndpoint = 'http://129.80.222.26:3000/metrics';
+
+        async function updateLiveTelemetry() {
+            try {
+                const response = await fetch(telemetryEndpoint);
+                if (!response.ok) throw new Error('Telemetry Offline');
+                
+                const data = await response.json();
+
+                // Map API data to your DOM elements
+                document.getElementById('cpu-perc').innerText = `${Math.floor(data.cpu)}%`;
+                document.getElementById('ram-perc').innerText = `${Math.floor(data.mem)}%`;
+                
+                // Update progress bars (assuming they have specific IDs)
+                document.getElementById('cpu-fill').style.width = `${data.cpu}%`;
+                document.getElementById('ram-fill').style.width = `${data.mem}%`;
+
+                // Update sys-load (if element exists)
+                const sysLoadElement = document.getElementById('sys-load'); // This ID is not in systems.html, add conditional check
+                if (sysLoadElement) sysLoadElement.innerText = data.load;
+                
+                // Convert seconds to a readable Uptime string (H:M:S)
+                const uptimeValElement = document.getElementById('uptime-val'); // Correct ID from systems.html
+                if (uptimeValElement) {
+                    const h = Math.floor(data.uptime / 3600);
+                    const m = Math.floor((data.uptime % 3600) / 60);
+                    const s = Math.floor(data.uptime % 60);
+                    uptimeValElement.innerText = `${h}h ${m}m ${s}s`;
+                }
+            } catch (error) {
+                console.error('Metrics Fetch Error:', error);
+                // Fallback UI state if the API is down
+                document.getElementById('cpu-perc').innerText = 'OFFLINE';
+                document.getElementById('ram-perc').innerText = 'OFFLINE';
+                const sysLoadElement = document.getElementById('sys-load');
+                if (sysLoadElement) sysLoadElement.innerText = 'OFFLINE';
+                document.getElementById('uptime-val').innerText = 'OFFLINE';
+                
+                // Also reset progress bars
+                document.getElementById('cpu-fill').style.width = "0%";
+                document.getElementById('ram-fill').style.width = "0%";
+            }
+        }
+        setInterval(updateLiveTelemetry, 5000); // Refresh every 5 seconds
+        updateLiveTelemetry(); // Initial call
+
+        // Keep Nginx Logs (tail -f) - this was part of the old block but not replaced in the new code.
+        // I will keep the existing Nginx log generation logic, as it's not part of the telemetry API.
         setInterval(() => {
-            document.getElementById('cpu-fill')?.style.width = (Math.random()*15+5) + "%"; // Optional chaining
-            document.getElementById('ram-fill')?.style.width = (Math.random()*10+40) + "%"; // Optional chaining
-            const p = document.createElement('p'); p.innerText = `[${new Date().toLocaleTimeString()}] GET /api/v1/telemetry 200 OK`;
-            const logStream = document.getElementById('log-stream');
-            if(logStream) { // Null check
-                logStream.prepend(p);
-                // Keep log stream manageable, perhaps a max number of lines
-                if (logStream.children.length > 20) {
-                    logStream.removeChild(logStream.lastChild);
+            const fakeLogEntries = [
+                `123.45.67.89 - - [${new Date().toLocaleString()}] "GET /index.html HTTP/1.1" 200 1234 "-" "Mozilla/5.0..."`,
+                `203.0.113.1 - - [${new Date().toLocaleString()}] "GET /assets/css/style.css HTTP/1.1" 200 5678 "-" "Mozilla/5.0..."`,
+                `198.51.100.2 - - [${new Date().toLocaleString()}] "GET /music/dummy_track.mp3 HTTP/1.1" 200 9012 "-" "Mozilla/5.0..."`,
+                `10.0.0.5 - - [${new Date().toLocaleString()}] "POST /api/data HTTP/1.1" 404 150 "-" "curl/7.68.0"`,
+                `172.16.0.1 - - [${new Date().toLocaleString()}] "GET /systems.html HTTP/1.1" 200 3456 "-" "Chrome/..."`,
+            ];
+            const nginxLogOutput = document.getElementById('log-stream'); // Correct ID from systems.html
+            if (nginxLogOutput) {
+                const newLog = document.createElement('p');
+                newLog.textContent = fakeLogEntries[Math.floor(Math.random() * fakeLogEntries.length)];
+                nginxLogOutput.prepend(newLog); // prepend to show new logs at top
+                if (nginxLogOutput.children.length > 20) { // Keep log output manageable
+                    nginxLogOutput.removeChild(nginxLogOutput.lastChild);
                 }
             }
-        }, 2000);
+        }, 1500); // Nginx log update interval
     }
 
     const cliOverlay = document.getElementById('cli-overlay');
