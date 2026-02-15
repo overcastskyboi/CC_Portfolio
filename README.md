@@ -6,7 +6,7 @@ A production-grade infrastructure project featuring a containerized Node.js back
 *   **Infrastructure:** OCI Compute Instance (Oracle Linux 9) hardened with Stateful Ingress rules.
 *   **Backend:** Node.js API (Port 3000) mapping host `/proc` and `/sys` filesystems for kernel-level telemetry.
 *   **Orchestration:** Docker Compose managing the Metrics API and Portainer management console.
-*   **Frontend:** Real-time `async/fetch` pipeline in `app.js` with a pulsing "Server Live" status indicator.
+*   **Frontend:** Real-time `async/fetch` pipeline in `app.js`, polling the backend every 10 seconds, featuring a pulsing "Server Live" status indicator.
 
 ## 🛠 Directory Structure
 - `docker/telemetry/`: OCI backend configuration (Docker Compose & Node API).
