@@ -5,9 +5,9 @@
 
 // --- Configuration Constants ---
 const BOOT_TRANSITION_DELAY_MS = 1200; // 1.2 seconds
-const TELEMETRY_API_ENDPOINT = 'https://portfolio.yourdomain.com/metrics';
+const TELEMETRY_API_ENDPOINT = 'https:/129.80.222.26:3000/metrics/';
 const TELEMETRY_UPDATE_INTERVAL_MS = 10000; // 10 seconds
-const OCI_MEDIA_BASE_URL = 'https://portfolio.yourdomain.com/stream/';
+const OCI_MEDIA_BASE_URL = 'https:/129.80.222.26:3000/stream';
 
 // --- 1. BOOT SEQUENCE TRANSITION ---
 // Initial site setup and boot sequence
