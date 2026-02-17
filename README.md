@@ -1,85 +1,63 @@
-# CherryOS 2.0
+# CherryOS
 
-CherryOS 2.0 is a React + Tailwind powered, desktop-style portfolio experience that mimics a lightweight operating system environment in the browser.
-
-## Features
-
-- Boot sequence and lock screen flow
-- Desktop with launchable app icons
-- Draggable, focusable, minimizable windows
-- Taskbar/mobile dock with active apps and clock
-- Built-in portfolio apps:
-  - **My Songs** (music player shell with lyrics + transport UI)
-  - **Watch Log** (anime/manga catalogue with filtering)
-  - **Game Center** (gaming profile dashboard)
-  - **Studio Rack** (music production plugin inventory)
-  - **Terminal** (interactive fake shell commands)
-
-## Tech Stack
-
-- **React 18**
-- **Vite 5**
-- **Tailwind CSS 3**
-- **lucide-react** icons
+CherryOS is a React-based operating system interface designed to provide a modern, responsive user experience with a focus on accessibility and performance.
 
 ## Project Structure
 
-```text
-CC_Portfolio/
-├── public/                      # Static public assets (placeholders for media/images)
-├── src/
-│   ├── App.jsx                  # CherryOS app shell + all app windows
-│   ├── main.jsx                 # React bootstrap entry
-│   └── styles.css               # Tailwind directives + global utility styles
-├── index.html                   # Vite host HTML
-├── package.json                 # Scripts + dependencies
-├── postcss.config.js            # Tailwind/PostCSS wiring
-├── tailwind.config.js           # Tailwind content config
-└── vite.config.js               # Vite React configuration
-```
+This project was bootstrapped with Create React App and includes:
 
-## Getting Started
+- React 18 with Hooks
+- TypeScript support
+- Responsive design with CSS modules
+- Testing with Jest and React Testing Library
+- GitHub Actions for CI/CD
 
-### 1) Install dependencies
+## Available Scripts
 
-```bash
-npm install
-```
+In the project directory, you can run:
 
-### 2) Run locally
+### `npm start`
 
-```bash
-npm run dev
-```
+Runs the app in the development mode.\
+Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
 
-Open the URL shown by Vite (usually `http://localhost:5173`).
+The page will reload if you make edits.\
+You will also see any lint errors in the console.
 
-### 3) Build production bundle
+### `npm test`
 
-```bash
-npm run build
-```
+Launches the test runner in the interactive watch mode.\
+See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
 
-### 4) Preview production build
+### `npm run build`
 
-```bash
-npm run preview
-```
+Builds the app for production to the `build` folder.\
+It correctly bundles React in production mode and optimizes the build for the best performance.
 
-## Placeholder Dependencies / Content
+The build is minified and the filenames include the hashes.\
+Your app is ready to be deployed!
 
-CherryOS 2.0 is fully functional without external APIs. A few elements are intentionally placeholder-driven so the branch remains portable:
+### `npm run eject`
 
-- Music player track/audio state is UI-only (no streaming backend required).
-- Anime/manga and gaming stats are static local data objects.
-- Background image on lock screen uses a public URL; swap with local assets in `public/` for offline deployments.
+**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
 
-## Customization
+If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
 
-- Update desktop apps and content in `src/App.jsx`.
-- Add real API integrations by replacing static data constants.
-- Add custom artwork/audio in `public/` and wire into app components.
+Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
 
-## Notes
+## GitHub Actions Workflows
 
-This branch intentionally preserves legacy static files (`assets/`, `music.html`, `systems.html`) for reference while introducing a complete CherryOS 2.0 React application as the primary runnable site.
+This project uses GitHub Actions for continuous integration and deployment:
+
+1. **ci-cd.yml** - Runs tests and builds the application on every push and pull request to the main branch
+2. **publish.yml** - Publishes the package to both NPM and GitHub Packages when a new release is created
+
+## Deployment
+
+The application is automatically deployed to GitHub Pages when changes are pushed to the main branch.
+
+## Learn More
+
+You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+
+To learn React, check out the [React documentation](https://reactjs.org/).

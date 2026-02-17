@@ -191,7 +191,25 @@ const useOS = () => useContext(OSContext);
 const TerminalApp = () => {
   const [history, setHistory] = useState(['Colin Cherry Interactive Shell v2.4', 'Connected to Oracle Cloud Instance (Ubuntu)', "Type 'help' for commands."]);
   const [input, setInput] = useState('');
+  const [telemetry, setTelemetry] = useState(null);
   const endRef = useRef(null);
+
+  useEffect(() => {
+    const fetchTelemetry = async () => {
+      try {
+        const response = await fetch('https://129.80.222.26:3000/metrics/');
+        if (response.ok) {
+          const data = await response.json();
+          setTelemetry(data);
+        }
+      } catch (err) {
+        console.error('Telemetry fetch failed', err);
+      }
+    };
+    fetchTelemetry();
+    const interval = setInterval(fetchTelemetry, 10000);
+    return () => clearInterval(interval);
+  }, []);
 
   const handleCommand = (e) => {
     if (e.key === 'Enter') {
@@ -199,13 +217,20 @@ const TerminalApp = () => {
       let output = `guest@cherry-os:~$ ${input}`;
       switch (cmd) {
         case 'help':
-          output += '\nCommands: whoami, ls, clear, reboot';
+          output += '\nCommands: whoami, ls, clear, reboot, telemetry';
           break;
         case 'whoami':
           output += '\nColin Cherry | IT Pro | Producer | Gamer';
           break;
         case 'ls':
           output += '\nresume.pdf  beats/  projects/  anime_list.json';
+          break;
+        case 'telemetry':
+          if (telemetry) {
+            output += `\nCPU: ${telemetry.cpu}% | MEM: ${telemetry.mem}% | Uptime: ${Math.floor(telemetry.uptime / 3600)}h ${Math.floor((telemetry.uptime % 3600) / 60)}m`;
+          } else {
+            output += '\nTelemetry data unavailable.';
+          }
           break;
         case 'clear':
           setHistory([]);

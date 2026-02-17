@@ -1,7 +1,33 @@
-# Block the heavy/private stuff
-music/
-assets/img/music_covers/
+# dependencies
+/node_modules
+/.pnp
+.pnp.js
 
-# Allow the logic and styles
-!assets/js/
-!assets/css/
+# testing
+/coverage
+
+# build
+/build
+
+# env
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# misc
+.DS_Store
+*.log
+*.tmp
+*.swp
+*~
+
+# IDE
+.vscode/
+.idea/
+*.code-workspace
+
+# OS
+Thumbs.db
+Desktop.ini
