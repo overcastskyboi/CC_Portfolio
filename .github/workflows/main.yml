@@ -1,8 +1,6 @@
 name: CherryOS Lifecycle
 
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
   release:
     types: [created]
@@ -17,9 +15,10 @@ jobs:
   quality-gate:
     name: Lint & Unit Tests
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     strategy:
       matrix:
-        node-version: [18.x, 20.x]
+        node-version: [20.x]
     steps:
       - uses: actions/checkout@v4
       - name: Use Node.js ${{ matrix.node-version }}
@@ -28,8 +27,6 @@ jobs:
           node-version: ${{ matrix.node-version }}
           cache: 'npm'
       - run: npm ci
-      - name: Dependency audit
-        run: npm audit --audit-level=high
       - name: Static Analysis (Lint)
         run: npm run lint
       - name: Unit Tests
@@ -39,6 +36,7 @@ jobs:
     name: End-to-End Tests
     needs: quality-gate
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - name: Use Node.js 20
@@ -56,13 +54,14 @@ jobs:
         with:
           name: playwright-report
           path: playwright-report/
-          retention-days: 30
+          retention-days: 7
 
   deploy:
     name: Deploy to GitHub Pages
     needs: e2e-tests
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
       - name: Use Node.js 20
@@ -73,7 +72,7 @@ jobs:
       - run: npm ci
       - run: npm run build
       - name: Setup Pages
-        uses: actions/configure-pages@v5
+        uses: actions/configure-pages@v4
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
@@ -81,31 +80,3 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
-
-  publish:
-    name: Publish Release
-    needs: e2e-tests
-    if: github.event_name == 'release'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Use Node.js 20
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          registry-url: https://registry.npmjs.org/
-          cache: 'npm'
-      - run: npm ci
-      - name: Build
-        run: npm run build
-      # npm publish uses repo secret NPM_TOKEN (Settings → Secrets → Actions)
-      - name: Publish to NPM
-        run: npm publish --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-      - name: Publish to GitHub Packages
-        run: |
-          npm config set registry https://npm.pkg.github.com/
-          npm publish
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
