@@ -34,6 +34,7 @@ export default [
       "react/react-in-jsx-scope": "off",
       "react/prop-types": "off",
       "no-unused-vars": "warn",
+      "react/display-name": "off", // Temporarily disabled due to ESLint 10 compatibility issue
     },
     settings: {
       react: {
