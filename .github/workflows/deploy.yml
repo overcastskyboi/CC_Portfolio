@@ -15,8 +15,14 @@ jobs:
       - name: Setup Node.js 🚀
         uses: actions/setup-node@v3
         with:
-          node-version: '18' # Or your project's required Node.js version
+          node-version: '20' # Upgraded to Node.js 20 to meet Vite's requirements
 
+      - name: Clean npm cache, node_modules and package-lock.json 🧹
+        run: |
+          npm cache clean --force
+          rm -rf node_modules
+          rm -f package-lock.json
+          
       - name: Install dependencies 📦
         run: npm install --legacy-peer-deps
 
