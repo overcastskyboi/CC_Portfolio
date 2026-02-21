@@ -166,7 +166,9 @@ To use environment variables:
 
 ### GitHub Actions
 
-This repository uses the **CherryOS Lifecycle** workflow (`.github/workflows/main.yml`). On every **push to `main`** it runs lint, unit tests, dependency audit, and E2E tests (including cross-browser and mobile), then builds and deploys to **GitHub Pages**. Ensure GitHub Pages is enabled in the repo settings (Actions → Pages). Example pattern:
+This repository uses the **CherryOS Lifecycle** workflow (`.github/workflows/main.yml`). On every **push to `main`** it runs lint, unit tests, dependency audit, and E2E tests (including cross-browser and mobile), then builds and deploys to **GitHub Pages**.
+
+**Deployment verification:** In the repo **Settings → Pages**, set **Source** to **GitHub Actions**. The workflow uses `actions/configure-pages@v5`, `actions/upload-pages-artifact@v3`, and `actions/deploy-pages@v4`; after a successful run on `main`, the site updates automatically. Example pattern:
 
 ```yaml
 name: Deploy to GitHub Pages
