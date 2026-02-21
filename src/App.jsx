@@ -145,6 +145,10 @@ const OSProvider = ({ children }) => {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
   useEffect(() => {
+    console.log('OSProvider mounted, current bootState:', bootState);
+  }, [bootState]);
+
+  useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
@@ -634,8 +638,17 @@ const Desktop = () => {
 
 const LockScreen = () => {
   const { setBootState } = useOS();
+  
+  useEffect(() => {
+    console.log('LockScreen mounted');
+    return () => console.log('LockScreen unmounted');
+  }, []);
+
   return (
-    <div onClick={() => setBootState('desktop')} className="h-screen w-screen bg-black text-white flex flex-col items-center justify-center relative overflow-hidden cursor-pointer group">
+    <div onClick={() => {
+      console.log('LockScreen clicked, requesting desktop...');
+      setBootState('desktop');
+    }} className="h-screen w-screen bg-black text-white flex flex-col items-center justify-center relative overflow-hidden cursor-pointer group">
       <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1614726365723-49cfae96c698?q=80&w=2600&auto=format&fit=crop')] bg-cover opacity-30 grayscale group-hover:grayscale-0 transition-all duration-1000" />
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm group-hover:backdrop-blur-none transition-all duration-700" />
       <div className="z-10 text-center space-y-4">
@@ -652,6 +665,7 @@ const BootScreen = () => {
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {
+    console.log('BootScreen mounted');
     const timer = setInterval(() => {
       setProgress((p) => {
         if (p >= 100) {
@@ -661,11 +675,17 @@ const BootScreen = () => {
         return Math.min(100, p + Math.floor(Math.random() * 10));
       });
     }, 100);
-    return () => clearInterval(timer);
+    return () => {
+      console.log('BootScreen unmounted');
+      clearInterval(timer);
+    };
   }, []);
 
   useEffect(() => {
-    if (progress === 100) setBootState('locked');
+    if (progress === 100) {
+      console.log('Boot complete, setting state to locked');
+      setBootState('locked');
+    }
   }, [progress, setBootState]);
 
   return (
