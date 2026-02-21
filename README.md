@@ -32,9 +32,13 @@ CherryOS is optimized for **zero-cost, high-security serverless hosting**:
 - **Infrastructure**: Oracle Cloud Infrastructure (OCI), GitHub Pages
 - **Quality**: ESLint (SonarJS + Security Plugins)
 
-## 📖 Getting Started
+## 📖 Documentation
 
-Refer to [CONTRIBUTING.md](./CONTRIBUTING.md) for local development setup and guidelines.
+Detailed technical guides are available in the repository:
+
+- **[Architecture Map](./ARCHITECTURE.md)**: Project hierarchy, component mapping, and developer guides.
+- **[API Specifications](./API_SPEC.md)**: Detailed Zod schemas, data types, and error handling for all external integrations.
+- **[Contributing Guide](./CONTRIBUTING.md)**: Local development setup and PR guidelines.
 
 ## 🛡️ Security Posture
 
