@@ -14,8 +14,15 @@ export const TRACKS = [
 ];
 
 export const GAMING_DATA = {
-  steam: { user: "AugustElliott", level: 42, gamesCount: 184, topPlayed: [] },
-  retro: { user: "AugustElliott", hardcorePoints: 1200, recentMastery: "Final Fantasy VII" }
+  steam: { user: "AugustElliott", level: 42, gamesCount: 184 },
+  retro: { user: "AugustElliott", hardcorePoints: 1200, recentMastery: "Final Fantasy VII" },
+  collection: [
+    { title: "Final Fantasy VII", platform: "Retro", playtime: "84h", status: "Mastered", rating: 10 },
+    { title: "Elden Ring", platform: "Steam", playtime: "120h", status: "Playing", rating: 10 },
+    { title: "Metal Gear Solid", platform: "Retro", playtime: "20h", status: "Completed", rating: 9.5 },
+    { title: "Silent Hill 2", platform: "Retro", playtime: "12h", status: "Completed", rating: 10 },
+    { title: "Cyberpunk 2077", platform: "Steam", playtime: "65h", status: "Completed", rating: 9 }
+  ]
 };
 
 export const VST_LIST = {
