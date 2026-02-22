@@ -1,10 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-
-  const seekTimeout = useRef(null);
 import { Disc, Pause, Play, SkipForward, ArrowLeft, Music, LayoutGrid, AlertCircle, RefreshCcw, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import LazyImage from '../components/LazyImage';
-import { MusicManifestSchema } from '../data/schemas';
+import { MusicManifestSchema, TrackSchema, AlbumSchema } from '../data/schemas';
 
 const MyMusicApp = () => {
   // eslint-disable-next-line no-unused-vars
@@ -166,18 +164,49 @@ const MyMusicApp = () => {
     }
   }, [currentIndex, queue, isPlaying]);
 
-  const playCollection = (album, startIndex = 0) => {
-    const playerQueue = album.tracks.map(t => ({
-      ...t,
-      albumName: album.album_name,
-      artist: album.artist,
-      cover_url: album.cover_url
-    }));
-    setQueue(playerQueue);
-    setCurrentIndex(startIndex);
-    setIsPlaying(true);
-    setView('player');
-  };
+  const validateTrackDuration = (duration) => {
+      if (!duration || duration === '--:--') return 0;
+      
+      const parts = duration.split(':');
+      if (parts.length !== 2) return 0;
+      
+      const minutes = parseInt(parts[0], 10);
+      const seconds = parseInt(parts[1], 10);
+      
+      if (isNaN(minutes) || isNaN(seconds)) return 0;
+      
+      return minutes * 60 + seconds;
+    };
+  
+    const validateTrack = (track) => {
+      const validatedTrack = TrackSchema.parse({
+        ...track,
+        duration: validateTrackDuration(track.duration)
+      });
+      return validatedTrack;
+    };
+  
+    const validateAlbum = (album) => {
+      const validatedAlbum = AlbumSchema.parse(album);
+      return {
+        ...validatedAlbum,
+        tracks: validatedAlbum.tracks.map(validateTrack)
+      };
+    };
+  
+    const playCollection = (album, startIndex = 0) => {
+      const validatedAlbum = validateAlbum(album);
+      const playerQueue = validatedAlbum.tracks.map(t => ({
+        ...t,
+        albumName: validatedAlbum.album_name,
+        artist: validatedAlbum.artist,
+        cover_url: validatedAlbum.cover_url
+      }));
+      setQueue(playerQueue);
+      setCurrentIndex(startIndex);
+      setIsPlaying(true);
+      setView('player');
+    };
 
   const togglePlay = () => {
     if (isPlaying) {

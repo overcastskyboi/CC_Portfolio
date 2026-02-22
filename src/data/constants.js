@@ -100,3 +100,52 @@ export const VST_LIST = {
     "Individual: Abbey Road Saturator, Drip, RBass, Super VHS, Spitfire LABS, TyrellN6, UVIWorkstation"
   ]
 };
+
+export const calculateProductionValues = (bpm) => {
+  if (bpm <= 0) return {};
+  const quarterNote = 60000 / bpm;
+  
+  return {
+    delays: {
+      '1/4': {
+        straight: Number((quarterNote).toFixed(2)),
+        dotted: Number((quarterNote * 1.5).toFixed(2)),
+        triplet: Number((quarterNote * 0.66667).toFixed(2))
+      },
+      '1/8': {
+        straight: Number((quarterNote / 2).toFixed(2)),
+        dotted: Number((quarterNote / 2 * 1.5).toFixed(2)),
+        triplet: Number((quarterNote / 2 * 0.66667).toFixed(2))
+      },
+      '1/16': {
+        straight: Number((quarterNote / 4).toFixed(2)),
+        dotted: Number((quarterNote / 4 * 1.5).toFixed(2)),
+        triplet: Number((quarterNote / 4 * 0.66667).toFixed(2))
+      },
+      '1/32': {
+        straight: Number((quarterNote / 8).toFixed(2)),
+        dotted: Number((quarterNote / 8 * 1.5).toFixed(2)),
+        triplet: Number((quarterNote / 8 * 0.66667).toFixed(2))
+      }
+    },
+    reverb: {
+      preDelayTightMs: Number((quarterNote / 32).toFixed(2)),
+      preDelayLooseMs: Number((quarterNote / 64).toFixed(2)),
+      tailDecayMs: Number(((quarterNote * 4) + (quarterNote * 2)).toFixed(2))
+    },
+    compressor: {
+      releaseFastMs: Number((quarterNote / 16).toFixed(2)),
+      releaseMediumMs: Number((quarterNote / 8).toFixed(2)),
+      releaseSlowMs: Number((quarterNote / 4).toFixed(2)),
+      attackSnapMs: Number(((quarterNote / 32) / 2).toFixed(2))
+    },
+    lfoHz: {
+      '1/1': Number((1 / (quarterNote * 4)).toFixed(2)),
+      '1/2': Number((1 / (quarterNote * 2)).toFixed(2)),
+      '1/4': Number((1 / quarterNote).toFixed(2)),
+      '1/8': Number((1 / (quarterNote / 2)).toFixed(2)),
+      '1/16': Number((1 / (quarterNote / 4)).toFixed(2)),
+      '1/32': Number((1 / (quarterNote / 8)).toFixed(2))
+    }
+  };
+};

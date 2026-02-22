@@ -88,8 +88,8 @@ const CalculatorApp = () => {
   };
 
   const musicTimes = calculateMusicTime(bpm);
-    const productionValues = calculateProductionValues(bpm);
-    const vstList = VST_LIST;
+  const productionValues = calculateProductionValues(bpm);
+  const vstList = VST_LIST;
 
   const standardButtons = [
     { label: 'C', className: 'bg-gray-700', onClick: handleClear },
@@ -132,10 +132,7 @@ const CalculatorApp = () => {
     { label: 'General', className: 'bg-orange-500', plugins: vstList['General'] },
   ];
 
-    { label: 'Gate Hold', className: 'bg-green-500', values: productionValues['Gate Hold'] },
-            { label: 'Gate Release', className: 'bg-green-500', values: productionValues['Gate Release'] },
-            { label: 'LFO Rate', className: 'bg-green-500', values: productionValues['LFO Rate'] },
-          ];
+  const calculatorButtons = [
     { label: '6', onClick: () => handleDigit('6') },
     { label: '+', className: 'bg-orange-500', icon: <Plus size={24} />, onClick: () => handleOperator('+') },
     { label: '1', onClick: () => handleDigit('1') },
@@ -171,6 +168,15 @@ const CalculatorApp = () => {
           {/* Buttons */}
           <div className="grid grid-cols-4 gap-2 p-4 flex-grow">
             {standardButtons.map((btn, index) => (
+              <button
+                key={index}
+                onClick={btn.onClick}
+                className={`flex items-center justify-center p-4 text-2xl font-bold rounded-xl bg-gray-800 hover:bg-gray-700 transition-colors ${btn.className || ''}`}
+              >
+                {btn.icon || btn.label}
+              </button>
+            ))}
+            {calculatorButtons.map((btn, index) => (
               <button
                 key={index}
                 onClick={btn.onClick}
