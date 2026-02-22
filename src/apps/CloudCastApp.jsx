@@ -138,7 +138,7 @@ const CloudCastApp = () => {
       // Clean up abort controller
       abortController.current = null;
     }
-  }, [location, WEATHER_API_KEY]);
+  }, [location, WEATHER_API_KEY, weatherSchema]);
 
   useEffect(() => {
     fetchWeather();
@@ -244,7 +244,7 @@ const CloudCastApp = () => {
 
         {!weatherData && !loading && !error && (
           <div className="text-center">
-            <p className="text-blue-300">Enter a city name and click "Fetch" to see the weather.</p>
+            <p className="text-blue-300">Enter a city name and click &ldquo;Fetch&rdquo; to see the weather.</p>
           </div>
         )}
       </div>

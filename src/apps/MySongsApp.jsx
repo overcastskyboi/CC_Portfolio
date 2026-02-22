@@ -28,6 +28,7 @@ const MyMusicApp = () => {
     const [isSeeking, setIsSeeking] = useState(false);
 
   const audioRef = useRef(null);
+  const seekTimeout = useRef(null);
   
     useEffect(() => {
       if (!audioRef.current) {
@@ -131,7 +132,7 @@ const MyMusicApp = () => {
           audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
           audio.removeEventListener('error', handleError);
         };
-  }, [queue, currentIndex, skipTrack]); // Added skipTrack to dependencies
+  }, [queue, currentIndex, skipTrack, isSeeking, handleEnded, handleTimeUpdate, handleLoadedMetadata, handleError]); // Added all dependencies
 
   useEffect(() => {
     if (queue.length > 0) {
@@ -221,6 +222,13 @@ const MyMusicApp = () => {
       const newTime = Number(e.target.value);
       audioRef.current.currentTime = newTime;
       setProgress(newTime);
+      setIsSeeking(true);
+      
+      // Debounce seeking to prevent rapid updates
+      clearTimeout(seekTimeout.current);
+      seekTimeout.current = setTimeout(() => {
+        setIsSeeking(false);
+      }, 100);
   };
 
   const formatTime = (time) => {
