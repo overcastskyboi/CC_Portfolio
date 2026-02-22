@@ -13,6 +13,7 @@ import CloudCastApp from './apps/CloudCastApp';
 import ScratchpadApp from './apps/ScratchpadApp';
 import CalculatorApp from './apps/CalculatorApp';
 import CollectionTrackerApp from './apps/CollectionTrackerApp';
+import BPMTimingCalculator from './apps/BPMTimingCalculator';
 
 const MainContent = () => {
   const { bootState } = useOS();
@@ -33,6 +34,7 @@ const MainContent = () => {
       <Route path="/scratchpad" element={<div className="bg-gray-800"><ScratchpadApp /></div>} />
       <Route path="/calculator" element={<div className="bg-gray-900"><CalculatorApp /></div>} />
       <Route path="/collection-tracker" element={<div className="bg-slate-900"><CollectionTrackerApp /></div>} />
+      <Route path="/bpm-calculator" element={<div className="bg-gray-900"><BPMTimingCalculator /></div>} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

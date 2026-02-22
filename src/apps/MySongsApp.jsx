@@ -1,4 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+
+  const seekTimeout = useRef(null);
 import { Disc, Pause, Play, SkipForward, ArrowLeft, Music, LayoutGrid, AlertCircle, RefreshCcw, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import LazyImage from '../components/LazyImage';
@@ -24,9 +26,24 @@ const MyMusicApp = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
-  const [duration, setDuration] = useState(0);
+    const [duration, setDuration] = useState(0);
+    const [isSeeking, setIsSeeking] = useState(false);
 
-  const audioRef = useRef(new Audio());
+  const audioRef = useRef(null);
+  
+    useEffect(() => {
+      if (!audioRef.current) {
+        audioRef.current = new Audio();
+      }
+  
+      return () => {
+        if (audioRef.current) {
+          audioRef.current.pause();
+          audioRef.current.src = '';
+          audioRef.current = null;
+        }
+      };
+    }, []);
   const manifestUrl = "https://objectstorage.us-ashburn-1.oraclecloud.com/n/idg3nfddgypd/b/cherryos-deploy-prod/o/music_manifest.json";
 
   const APPLE_MUSIC_URL = "https://music.apple.com/us/artist/colin-cherry/1639040887";
@@ -87,7 +104,11 @@ const MyMusicApp = () => {
     const audio = audioRef.current;
 
     const handleEnded = () => skipTrack(1);
-    const handleTimeUpdate = () => setProgress(audio.currentTime);
+    const handleTimeUpdate = () => {
+        if (!isSeeking) {
+          setProgress(audio.currentTime);
+        }
+      };
     const handleLoadedMetadata = () => setDuration(audio.duration);
     const handleError = (e) => {
         console.error("Audio Error:", e);
@@ -100,11 +121,18 @@ const MyMusicApp = () => {
     audio.addEventListener('error', handleError);
 
     return () => {
-      audio.removeEventListener('ended', handleEnded);
-      audio.removeEventListener('timeupdate', handleTimeUpdate);
-      audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
-      audio.removeEventListener('error', handleError);
-    };
+          if (audioRef.current) {
+            audioRef.current.pause();
+            audioRef.current.src = '';
+            audioRef.current = null;
+          }
+    
+          clearTimeout(seekTimeout.current);
+          audio.removeEventListener('ended', handleEnded);
+          audio.removeEventListener('timeupdate', handleTimeUpdate);
+          audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
+          audio.removeEventListener('error', handleError);
+        };
   }, [queue, currentIndex, skipTrack]); // Added skipTrack to dependencies
 
   useEffect(() => {
@@ -115,12 +143,25 @@ const MyMusicApp = () => {
         audioRef.current.src = track.url;
         audioRef.current.load();
         if (isPlaying) {
-            audioRef.current.play().catch(e => console.warn("Autoplay blocked:", e));
-        }
+                    const playPromise = audioRef.current.play();
+                    if (playPromise !== undefined) {
+                        playPromise.catch(e => {
+                            console.warn("Autoplay blocked:", e);
+                            // Fallback: show user notification to click play
+                            setAutoplayBlocked(true);
+                        });
+                    }
+                }
       } else {
           if (isPlaying && audioRef.current.paused) {
-              audioRef.current.play().catch(e => console.warn(e));
-          }
+                         const playPromise = audioRef.current.play();
+                         if (playPromise !== undefined) {
+                             playPromise.catch(e => {
+                                 console.warn("Play failed:", e);
+                                 setAutoplayBlocked(true);
+                             });
+                         }
+                     }
       }
     }
   }, [currentIndex, queue, isPlaying]);
@@ -350,13 +391,32 @@ const MyMusicApp = () => {
         <div className="w-full max-w-md flex items-center gap-4 text-[10px] font-mono text-gray-500">
             <span>{formatTime(progress)}</span>
             <input
-                type="range"
-                min="0"
-                max={duration || 0}
-                value={progress}
-                onChange={handleSeek}
-                className="flex-1 h-1 bg-gray-800 rounded-lg appearance-none cursor-pointer accent-yellow-500"
-            />
+                            type="range"
+                            min="0"
+                            max={duration || 0}
+                            value={progress}
+                            onChange={(e) => {
+                              const newProgress = parseFloat(e.target.value);
+                              setProgress(newProgress);
+                              setIsSeeking(true);
+                              
+                              // Debounce seeking to prevent rapid updates
+                              clearTimeout(seekTimeout.current);
+                              seekTimeout.current = setTimeout(() => {
+                                if (audioRef.current) {
+                                  audioRef.current.currentTime = newProgress;
+                                }
+                                setIsSeeking(false);
+                              }, 100);
+                            }}
+                            onMouseUp={() => {
+                              if (audioRef.current && isSeeking) {
+                                audioRef.current.currentTime = progress;
+                                setIsSeeking(false);
+                              }
+                            }}
+                            className="flex-1 h-1 bg-gray-800 rounded-lg appearance-none cursor-pointer accent-yellow-500"
+                        />
             <span>{formatTime(duration)}</span>
         </div>
 

@@ -88,6 +88,8 @@ const CalculatorApp = () => {
   };
 
   const musicTimes = calculateMusicTime(bpm);
+    const productionValues = calculateProductionValues(bpm);
+    const vstList = VST_LIST;
 
   const standardButtons = [
     { label: 'C', className: 'bg-gray-700', onClick: handleClear },
@@ -98,8 +100,42 @@ const CalculatorApp = () => {
     { label: '8', onClick: () => handleDigit('8') },
     { label: '9', onClick: () => handleDigit('9') },
     { label: '-', className: 'bg-orange-500', icon: <Minus size={24} />, onClick: () => handleOperator('-') },
-    { label: '4', onClick: () => handleDigit('4') },
-    { label: '5', onClick: () => handleDigit('5') },
+  ];
+
+  const musicButtons = [
+    { label: 'BPM', className: 'bg-blue-500', input: true, value: bpm, onChange: (e) => setBpm(parseInt(e.target.value)) },
+    { label: '1/1', className: 'bg-purple-500', value: musicTimes['1/1'] },
+        { label: '1/2', className: 'bg-purple-500', value: musicTimes['1/2'] },
+        { label: '1/4', className: 'bg-purple-500', value: musicTimes['1/4'] },
+    { label: '1/8', className: 'bg-purple-500', value: musicTimes['1/8'] },
+        { label: '1/16', className: 'bg-purple-500', value: musicTimes['1/16'] },
+        { label: '1/32', className: 'bg-purple-500', value: musicTimes['1/32'] },
+  ];
+
+  const productionButtons = [
+    { label: 'Reverb Predelay', className: 'bg-green-500', values: productionValues['Reverb Predelay'] },
+    { label: 'Delay Time', className: 'bg-green-500', values: productionValues['Delay Time'] },
+    { label: 'Attack Time', className: 'bg-green-500', values: productionValues['Attack Time'] },
+    { label: 'Release Time', className: 'bg-green-500', values: productionValues['Release Time'] },
+    { label: 'Gate Hold', className: 'bg-green-500', values: productionValues['Gate Hold'] },
+    { label: 'Gate Release', className: 'bg-green-500', values: productionValues['Gate Release'] },
+    { label: 'LFO Rate', className: 'bg-green-500', values: productionValues['LFO Rate'] },
+  ];
+
+  const vstButtons = [
+    { label: 'Dynamics & Mixing', className: 'bg-orange-500', plugins: vstList['Dynamics_and_Mixing'] },
+    { label: 'EQ & Filters', className: 'bg-orange-500', plugins: vstList['EQ_and_Filters'] },
+    { label: 'Reverb & Delay', className: 'bg-orange-500', plugins: vstList['Reverb_and_Delay'] },
+    { label: 'Vocal & Utility', className: 'bg-orange-500', plugins: vstList['Vocal_and_Utility'] },
+    { label: 'Saturation & Tone', className: 'bg-orange-500', plugins: vstList['Saturation_and_Tone'] },
+    { label: 'Instruments', className: 'bg-orange-500', plugins: vstList['Instruments'] },
+    { label: 'General', className: 'bg-orange-500', plugins: vstList['General'] },
+  ];
+
+    { label: 'Gate Hold', className: 'bg-green-500', values: productionValues['Gate Hold'] },
+            { label: 'Gate Release', className: 'bg-green-500', values: productionValues['Gate Release'] },
+            { label: 'LFO Rate', className: 'bg-green-500', values: productionValues['LFO Rate'] },
+          ];
     { label: '6', onClick: () => handleDigit('6') },
     { label: '+', className: 'bg-orange-500', icon: <Plus size={24} />, onClick: () => handleOperator('+') },
     { label: '1', onClick: () => handleDigit('1') },
@@ -165,6 +201,45 @@ const CalculatorApp = () => {
                 <div className="text-sm text-rose-400">{time.toFixed(2)} ms</div>
               </div>
             ))}
+          </div>
+
+          <div className="space-y-4">
+            <h3 className="text-sm font-black text-gray-400 uppercase tracking-[0.2em]">Production Values</h3>
+            <div className="grid grid-cols-2 gap-2">
+              {productionButtons.map((btn) => (
+                <div key={btn.label} className="bg-gray-800 rounded-lg p-4">
+                  <div className="text-sm font-black text-gray-400 uppercase tracking-[0.2em] mb-2">
+                    {btn.label}
+                  </div>
+                  <div className="space-y-1">
+                    {Object.entries(btn.values).map(([key, value]) => (
+                      <div key={key} className="flex justify-between text-sm">
+                        <span className="text-gray-400">{key}</span>
+                        <span className="font-black text-white">{value.toFixed(2)} ms</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <h3 className="text-sm font-black text-gray-400 uppercase tracking-[0.2em]">VST Plugin Library</h3>
+            <div className="grid grid-cols-2 gap-2">
+              {vstButtons.map((btn) => (
+                <div key={btn.label} className="bg-gray-800 rounded-lg p-4">
+                  <div className="text-sm font-black text-gray-400 uppercase tracking-[0.2em] mb-2">
+                    {btn.label}
+                  </div>
+                  <div className="space-y-1">
+                    {btn.plugins.map((plugin, index) => (
+                      <div key={index} className="text-sm text-gray-400">{plugin}</div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       )}

@@ -63,15 +63,15 @@ export default function CollectionTrackerApp() {
           total += itemValue;
 
           // Group by broad category or console-name
-          const category = row['console-name'] || 'Uncategorized';
-          const itemName = row['product-name'] || 'Unknown Item';
-
-          if (!categoryLeaders[category] || singleValue > categoryLeaders[category].value) {
-            categoryLeaders[category] = {
-              name: itemName,
-              value: singleValue
-            };
-          }
+          const category = typeof row['console-name'] === 'string' ? row['console-name'] : 'Uncategorized';
+                    const itemName = typeof row['product-name'] === 'string' ? row['product-name'] : 'Unknown Item';
+          
+                    if (!categoryLeaders[category] || singleValue > categoryLeaders[category].value) {
+                      categoryLeaders[category] = {
+                        name: itemName,
+                        value: singleValue
+                      };
+                    }
         });
 
         setCurrentTotal(total);

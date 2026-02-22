@@ -36,7 +36,13 @@ export const AlbumSchema = z.object({
   releaseDate: z.string(),
 });
 
-export const MusicManifestSchema = z.array(AlbumSchema);
+export const MusicManifestSchema = z.array(AlbumSchema).refine(
+  (albums) => albums.every(album => album.tracks.length > 0),
+  {
+    message: 'Each album must contain at least one track',
+    code: 'invalid_manifest',
+  }
+);
 
 export const CoverSchema = z.object({
   title: z.string(),
